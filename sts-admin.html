@@ -783,7 +783,6 @@
       <li><a href="#daily"      onclick="handleNav(event,'daily')">Daily Insight</a></li>
       <li><a href="#topics"     onclick="handleNav(event,'topics')">Topics</a></li>
       <li><a href="#timeline"   onclick="handleNav(event,'timeline')">Timeline</a></li>
-      <li><a href="#newsletter" onclick="handleNav(event,'newsletter')">Newsletter</a></li>
     </ul>
     <a class="nav-cta" href="#daily" onclick="handleNav(event,'daily')">Get Insight</a>
     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
@@ -798,7 +797,6 @@
     <a href="#daily"      onclick="handleNav(event,'daily');toggleMenu()">Daily Insight</a>
     <a href="#topics"     onclick="handleNav(event,'topics');toggleMenu()">Topics</a>
     <a href="#timeline"   onclick="handleNav(event,'timeline');toggleMenu()">Timeline</a>
-    <a href="#newsletter" onclick="handleNav(event,'newsletter');toggleMenu()">Newsletter</a>
   </div>
 </nav>
 
@@ -1302,19 +1300,6 @@
     animId = requestAnimationFrame(draw);
   })();
   </script>
-
-  <section id="newsletter"><div class="container">
-    <div class="newsletter-box">
-      <div class="newsletter-icon">📬</div>
-      <h3>Stay Informed</h3>
-      <p>Get weekly STS insights delivered to your inbox. No paywalls, no noise—just rigorous thinking on technology and society.</p>
-      <div class="nl-form">
-        <input type="email" placeholder="your@email.com" id="nlEmail" />
-        <button onclick="subscribeNewsletter()">Subscribe →</button>
-      </div>
-      <p id="nl-confirm" class="nl-success">✓ You're on the list. Welcome to the nexus.</p>
-    </div>
-  </div></section>
 
   <footer>
     <div class="footer-logo">STS Nexus</div>
