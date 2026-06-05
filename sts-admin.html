@@ -2768,6 +2768,58 @@ document.querySelectorAll('.topic-card, .tl-content, .newsletter-box').forEach(e
   obs.observe(el);
 });
 
+// ── AIRTABLE INTEGRATION ──
+const AIRTABLE_TOKEN   = '';
+const AIRTABLE_BASE_ID = 'appFGvkZFKwvpINQP';
+const AIRTABLE_TABLE   = 'Daily Insights';
+
+async function fetchAirtableFacts() {
+  if (!AIRTABLE_TOKEN) return [];
+
+  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}?fields[]=category&fields[]=headline&fields[]=body&fields[]=source&maxRecords=200`;
+  try {
+    const res  = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` } });
+    if (!res.ok) throw new Error('Airtable fetch failed: ' + res.status);
+    const data = await res.json();
+    return data.records
+      .filter(r => r.fields.headline && r.fields.body)
+      .map(r => ({
+        category: r.fields.category || 'STS Insight',
+        headline: r.fields.headline,
+        body:     r.fields.body,
+        source:   r.fields.source  || 'Airtable',
+        _airtable: true
+      }));
+  } catch (e) {
+    console.warn('Airtable unavailable, using local facts.', e);
+    return [];
+  }
+}
+
+// ── INIT: fetch Airtable facts, apply daily seed to pick 5, then start slideshow ──
+(async function init() {
+  currentIndex = 0;
+
+  const airtableFacts = await fetchAirtableFacts();
+
+  let curatedFacts;
+  if (airtableFacts.length > 0) {
+    // Apply the same daily seed algorithm to Airtable facts
+    curatedFacts = pickDailyFacts(airtableFacts);
+  } else {
+    // Fall back to local FACTS array with existing algorithm
+    curatedFacts = getTodayFacts();
+  }
+
+  TODAY_FACTS.length = 0;
+  curatedFacts.forEach(f => TODAY_FACTS.push(f));
+
+  buildDots();
+  renderSlide('next');
+  handleHashRouting();
+})();
+</script>
+
 <!-- ═══ ADMIN VIEW ═══ -->
 <div id="admin-view" class="admin-view">
 
