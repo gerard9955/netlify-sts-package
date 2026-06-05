@@ -1,0 +1,3 @@
+/api/get-topics.php /.netlify/functions/get-topics 200
+/api/save-topic.php /.netlify/functions/save-topic 200
+/api/delete-topic.php /.netlify/functions/delete-topic 200
