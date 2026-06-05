@@ -2984,17 +2984,57 @@ async function sha256Text(text) {
 function isAdminUnlocked() {
   return sessionStorage.getItem(ADMIN_SESSION_KEY) === '1';
 }
+function askAdminCode() {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:1rem;';
+    overlay.innerHTML = `
+      <form id="adminAccessForm" style="width:min(420px,100%);background:#fff;color:#2C2C2A;border-radius:8px;padding:1.5rem;box-shadow:0 20px 60px rgba(0,0,0,.25);font-family:Inter,Arial,sans-serif;">
+        <h2 style="font-size:1.45rem;margin:0 0 1rem;font-weight:800;color:#185FA5;text-align:center;display:block;">Access Admin</h2>
+        <label for="adminAccessInput" style="display:block;font-weight:700;margin:.75rem 0 .35rem;">Access code</label>
+        <input id="adminAccessInput" type="password" autocomplete="current-password" required style="width:100%;box-sizing:border-box;padding:.75rem;border:1px solid #bbb;border-radius:6px;font-size:1rem;" />
+        <p style="margin:.45rem 0 0;color:#666;font-size:.85rem;">Characters are hidden while you type.</p>
+        <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.25rem;">
+          <button type="button" id="adminAccessCancel" style="padding:.65rem 1rem;border:1px solid #ccc;background:#fff;border-radius:6px;cursor:pointer;font-weight:700;">Cancel</button>
+          <button type="submit" style="padding:.65rem 1rem;border:0;background:#185FA5;color:#fff;border-radius:6px;cursor:pointer;font-weight:800;">Enter</button>
+        </div>
+      </form>`;
+    document.body.appendChild(overlay);
+    const form = overlay.querySelector('#adminAccessForm');
+    const input = overlay.querySelector('#adminAccessInput');
+    const close = (value) => {
+      overlay.remove();
+      resolve(value);
+    };
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      close(input.value.trim());
+    });
+    overlay.querySelector('#adminAccessCancel').addEventListener('click', () => close(''));
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay) close('');
+    });
+    input.focus();
+  });
+}
 async function requestAdminAccess() {
   if (isAdminUnlocked()) return true;
-  const code = prompt('Enter admin access code:');
-  if (!code) return false;
-  const hash = await sha256Text(code);
-  if (hash === ADMIN_ACCESS_HASH) {
-    sessionStorage.setItem(ADMIN_SESSION_KEY, '1');
-    return true;
+
+  while (true) {
+    const code = await askAdminCode();
+    if (!code) return false;
+
+    const hash = await sha256Text(code);
+    if (hash === ADMIN_ACCESS_HASH) {
+      sessionStorage.setItem(ADMIN_SESSION_KEY, '1');
+      sessionStorage.setItem(ADMIN_CODE_SESSION_KEY, code);
+      return true;
+    }
+
+    alert('Incorrect password. Please try again.');
   }
-  alert('Incorrect admin access code.');
-  return false;
 }
 function leaveAdminRoute() {
   document.body.classList.remove('admin-mode');
